@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Environment
 .env
@@ -8,7 +7,10 @@ package-lock.json
 
 # WhatsApp session data (sensitive)
 session/
-*.json
+session/*.json
+
+# Package lock (optional, can be included if needed)
+# package-lock.json
 
 # Logs
 *.log
