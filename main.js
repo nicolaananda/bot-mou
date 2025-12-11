@@ -1,23 +1,11 @@
 require("./setting.js")
-const { default: makeWASocket, useMultiFileAuthState, makeInMemoryStore, jidDecode, delay } = require("@dappaoffc/baileys")
+const { default: makeWASocket, useMultiFileAuthState, makeInMemoryStore, jidDecode, delay, proto } = require("@dappaoffc/baileys")
 const chalk = require('chalk')
 const readline = require('readline')
 const pino = require('pino')
-const fs = require("fs");
+const fs = require("fs")
 const figlet = require("figlet")
-const PhoneNumber = require('awesome-phonenumber')
-const moment = require('moment')
-const momentTz = require('moment-timezone')
-const cron = require("node-cron")
-const time = moment(new Date()).format('HH:mm:ss DD/MM/YYYY')
-const yargs = require('yargs/yargs')
-const { exec, execSync } = require("child_process");
-
-const { smsg, getBuffer } = require("./function/myfunc.js")
-const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./function/uploader.js')
-const { color } = require('./function/console.js')
-const { groupResponseWelcome, groupResponseRemove, groupResponsePromote, groupResponseDemote } = require('./function/respon-group.js')
-const { nocache } = require('./function/chache.js')
+const moment = require('moment-timezone')
 
 const question = (text) => {
   const rl = readline.createInterface({
@@ -29,73 +17,43 @@ const question = (text) => {
   })
 }
 
-//DATABASE
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
-global.db = new (require('./function/database'))(`${opts._[0] ? opts._[0] + '_' : ''}options/database.json`, null, 2)
-
-// Load backup system
-require('./options/backup')
-
-// Load graceful shutdown handler
-require('./options/graceful-shutdown')
-
-// Load database helper
-global.dbHelper = require('./options/db-helper')
-
-// Load full snapshot from PG (if enabled), then init defaults and log counts
-;(async () => {
-  try {
-    const usePg = String(process.env.USE_PG || '').toLowerCase() === 'true'
-    if (usePg && typeof db.load === 'function') {
-      await db.load()
-    }
-  } catch (e) {
-    console.error('[DB] Failed to load from Postgres:', e)
+// Helper function: smsg (simplified message object)
+function smsg(conn, m, store) {
+  if (!m) return m
+  let M = proto.WebMessageInfo
+  var message = M.fromObject(m)
+  if (message.key) {
+    message.id = message.key.id
+    message.isBaileys = message.id.startsWith('BAE5') && message.id.length === 16
+    message.chat = message.key.remoteJid
+    message.fromMe = message.key.fromMe
+    message.isGroup = message.chat.endsWith('@g.us')
+    message.sender = conn.decodeJid(message.fromMe && conn.user.id || message.participant || message.key.participant || message.chat || '')
+    if (message.isGroup) message.participant = conn.decodeJid(message.key.participant) || ''
   }
+  if (message.message) {
+    message.mtype = Object.keys(message.message)[0]
+    message.msg = message.message[message.mtype]
+    message.text = message.msg?.text || message.msg?.caption || message.message?.conversation || message.msg?.contentText || message.msg?.selectedDisplayText || message.msg?.title || ''
+    message.pushName = m.pushName || 'No Name'
+  }
+  return message
+}
 
-  // Initialize database structure only if it doesn't exist
-  // Don't overwrite existing data
-  if (!db.data.list) db.data.list = []
-  if (!db.data.testi) db.data.testi = []
-  if (!db.data.chat) db.data.chat = {}
-  if (!db.data.users) db.data.users = {}
-  if (!db.data.sewa) db.data.sewa = {}
-  if (!db.data.profit) db.data.profit = {}
-  if (!db.data.topup) db.data.topup = {}
-  if (!db.data.type) db.data.type = type
-  if (!db.data.setting) db.data.setting = {}
-  if (!db.data.deposit) db.data.deposit = {}
-  if (!db.data.produk) db.data.produk = {}
-  if (!db.data.order) db.data.order = {}
-  if (!db.data.transaksi) db.data.transaksi = []
-  if (!db.data.persentase) db.data.persentase = {}
-  if (!db.data.customProfit) db.data.customProfit = {}
-
-  // Log database status
-  console.log(`📊 Database loaded: ${Object.keys(db.data.users || {}).length} users, ${(db.data.transaksi || []).length} transactions`)
-
-  let lastJSON = JSON.stringify(db.data)
-  if (!global.opts['test']) setInterval(async () => {
-    if (JSON.stringify(db.data) == lastJSON) return
-    await db.save()
-    lastJSON = JSON.stringify(db.data)
-  }, 5 * 1000) // Ubah dari 10 detik ke 5 detik
-})()
-
-async function startronzz() {
-
-  console.log(chalk.bold.green(figlet.textSync('Velzzy', {
+async function startBot() {
+  console.log(chalk.bold.green(figlet.textSync('Bot MoU', {
     font: 'Standard',
     horizontalLayout: 'default',
     vertivalLayout: 'default',
     whitespaceBreak: false
   })))
+  
+  console.log(chalk.yellow('🤖 Bot Admin MoU Validator'))
+  console.log(chalk.cyan('📝 Automated MoU PDF Validation'))
+  console.log(chalk.green('✨ Powered by OpenAI\n'))
+  
   delay(100)
-  // console.log(chalk.yellow(`${chalk.red('[ CREATOR RONZZ YT ]')}\n\n${chalk.italic.magenta(`SV Ronzz YT\nNomor: 08817861263\nSebut nama👆,`)}\n\n\n${chalk.red(`ADMIN MENYEDIAKAN`)}\n${chalk.white(`- SC BOT TOPUP\n- SC BOT CPANEL\n- SC BOT CPANEL DEPO OTOMATIS\n- SC BOT PUSH KONTAK\n- ADD FITUR JADIBOT\n- UBAH SC LAMA KE PAIRING CODE\n- FIXS FITUR/SC ERROR\n`)}`))
-
-  require('./index')
-  nocache('../index', module => console.log(chalk.greenBright('[ VelzzyBotz ]  ') + time + chalk.cyanBright(` "${module}" Telah diupdate!`)))
-
+  
   const store = makeInMemoryStore({
     logger: pino().child({
       level: 'silent',
@@ -109,27 +67,27 @@ async function startronzz() {
     logger: pino({ level: "silent" }),
     printQRInTerminal: !pairingCode,
     auth: state,
-    browser: ['Ubuntu', 'Chrome', '20.0.04']
+    browser: ['MoU Validator Bot', 'Chrome', '20.0.04']
   })
 
   if (pairingCode && !ronzz.authState.creds.registered) {
-    const phoneNumber = await question(color('\n\nSilahkan masukkan nomor Whatsapp bot anda, awali dengan 62:\n', 'magenta'));
-    const code = await ronzz.requestPairingCode(phoneNumber.trim(), "RONZZYT1")
-    console.log(color(`⚠︎ Phone number:`, "gold"), color(`${phoneNumber}`, "white"))
-    console.log(color(`⚠︎ Pairing code:`, "gold"), color(`${code}`, "white"))
+    const phoneNumber = await question(chalk.magenta('\n\nSilahkan masukkan nomor WhatsApp bot anda, awali dengan 62:\n'));
+    const code = await ronzz.requestPairingCode(phoneNumber.trim())
+    console.log(chalk.yellow(`⚠︎ Phone number:`), chalk.white(`${phoneNumber}`))
+    console.log(chalk.yellow(`⚠︎ Pairing code:`), chalk.white(`${code}`))
   }
 
   ronzz.ev.on("connection.update", ({ connection }) => {
     if (connection === "open") {
-      console.log("CONNECTION OPEN ( +" + ronzz.user?.["id"]["split"](":")[0] + " || " + ronzz.user?.["name"] + " )")
+      console.log(chalk.green("✅ CONNECTION OPEN") + chalk.cyan(` ( +${ronzz.user?.["id"]["split"](":")[0]} || ${ronzz.user?.["name"]} )`))
     }
     if (connection === "close") {
-      console.log("Connection closed, tolong hapus file session dan scan ulang");
-      startronzz()
+      console.log(chalk.red("❌ Connection closed, tolong hapus folder session dan scan ulang"));
+      startBot()
     }
     if (connection === "connecting") {
       if (ronzz.user) {
-        console.log("CONNECTION FOR ( +" + ronzz.user?.["id"]["split"](":")[0] + " || " + ronzz.user?.["name"] + " )")
+        console.log(chalk.yellow("🔄 CONNECTING...") + chalk.cyan(` ( +${ronzz.user?.["id"]["split"](":")[0]} || ${ronzz.user?.["name"]} )`))
       }
     }
   })
@@ -147,7 +105,7 @@ async function startronzz() {
         require('./index')(ronzz, m, mek)
       }
     } catch (err) {
-      console.log(err)
+      console.error(chalk.red('❌ Message handler error:'), err)
     }
   })
 
@@ -165,102 +123,6 @@ async function startronzz() {
       await saveCreds()
     }
   })
-  
-  async function autoBackup() {
-    // Create backup directory if it doesn't exist
-    const backupDir = './backup';
-    if (!fs.existsSync(backupDir)) {
-      fs.mkdirSync(backupDir, { recursive: true });
-    }
-    
-    let ls = (await execSync("ls")).toString().split("\n").filter((pe) =>
-      pe != "node_modules" &&
-      pe != "session" &&
-      pe != "package-lock.json" &&
-      pe != "yarn.lock" &&
-      pe != ".npm" &&
-      pe != ".cache" &&
-      pe != "backup" &&
-      pe != ""
-    )
-    
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupFileName = `SC-TOPUP-ORKUT-BUTTON-${timestamp}.zip`;
-    const backupPath = `${backupDir}/${backupFileName}`;
-    
-    await execSync(`zip -r ${backupPath} ${ls.join(" ")}`)
-    await delay(500)
-    
-    try {
-      console.log(`✅ Backup berhasil dibuat: ${backupPath}`);
-      
-      // Hapus backup lama (lebih dari 7 hari)
-      const files = fs.readdirSync(backupDir);
-      const now = Date.now();
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      
-      files.forEach(file => {
-        if (file.startsWith('SC-TOPUP-ORKUT-BUTTON-') && file.endsWith('.zip')) {
-          const filePath = `${backupDir}/${file}`;
-          const stats = fs.statSync(filePath);
-          if (now - stats.mtime.getTime() > sevenDays) {
-            fs.unlinkSync(filePath);
-            console.log(`🗑️ Backup lama dihapus: ${file}`);
-          }
-        }
-      });
-      
-    } catch (err) {
-      console.log("❌ Error saat membuat backup:", err);
-    }
-  }
-  console.log('ℹ️ Auto-backup disabled');
-
-  // Silence incoming call offers; no auto-replies or blocks
-  ronzz.ws.on('CB:call', async (json) => {
-    try {
-      const tag = json?.content?.[0]?.tag
-      if (tag !== 'offer') return
-      // intentionally do nothing
-    } catch {}
-  })
-
-  ronzz.ev.on('group-participants.update', async (update) => {
-    if (!db.data.chat[update.id]?.welcome) return
-    groupResponseDemote(ronzz, update)
-    groupResponsePromote(ronzz, update)
-    groupResponseWelcome(ronzz, update)
-    groupResponseRemove(ronzz, update)
-  })
-
-  ronzz.getName = (jid, withoutContact = false) => {
-    var id = ronzz.decodeJid(jid)
-    withoutContact = ronzz.withoutContact || withoutContact
-    let v
-    if (id.endsWith("@g.us")) return new Promise(async (resolve) => {
-      v = store.contacts[id] || {}
-      if (!(v.name || v.subject)) v = ronzz.groupMetadata(id) || {}
-      resolve(v.name || v.subject || PhoneNumber('+' + id.replace('@s.whatsapp.net', '')).getNumber('international'))
-    })
-    else v = id === '0@s.whatsapp.net' ? { id, name: 'WhatsApp' } : id === ronzz.decodeJid(ronzz.user.id) ? ronzz.user : (store.contacts[id] || {})
-    return (withoutContact ? '' : v.name) || v.subject || v.verifiedName || PhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international')
-  }
-
-  ronzz.sendContact = async (jid, contact, quoted = '', opts = {}) => {
-    let list = []
-    for (let i of contact) {
-      list.push({
-        lisplayName: owner.includes(i) ? ownerName : await ronzz.getName(i + '@s.whatsapp.net'),
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${owner.includes(i) ? ownerName : await ronzz.getName(i + '@s.whatsapp.net')}\nFN:${ownerNomer.includes(i) ? ownerName : await ronzz.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
-      })
-    }
-    return ronzz.sendMessage(jid, { contacts: { displayName: `${list.length} Kontak`, contacts: list }, ...opts }, { quoted })
-  }
-
-  ronzz.sendImage = async (jid, path, caption = '', quoted = '', options) => {
-    let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
-    return await ronzz.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted })
-  }
 
   ronzz.decodeJid = (jid) => {
     if (!jid) return jid
@@ -270,69 +132,16 @@ async function startronzz() {
     } else return jid
   }
 
-  ronzz.sendImageAsSticker = async (jid, path, quoted, options = {}) => {
-    let buff = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
-    let buffer
-    if (options && (options.packname || options.author)) {
-      buffer = await writeExifImg(buff, options)
-    } else {
-      buffer = await imageToWebp(buff)
-    }
-    await ronzz.sendMessage(jid, { sticker: { url: buffer }, ...options }, { quoted }).then(response => {
-      fs.unlinkSync(buffer)
-      return response
-    })
-  }
-
-  ronzz.sendVideoAsSticker = async (jid, path, quoted, options = {}) => {
-    let buff = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
-    let buffer
-    if (options && (options.packname || options.author)) {
-      buffer = await writeExifVid(buff, options)
-    } else {
-      buffer = await videoToWebp(buff)
-    }
-    await ronzz.sendMessage(jid, { sticker: { url: buffer }, ...options }, { quoted }).then(response => {
-      fs.unlinkSync(buffer)
-      return response
-    })
-  }
-
-  // Simpan reference ronzz di global scope untuk akses dari cron job
-  global.ronzzInstance = ronzz
-
-  // Helper: resolve link invite to JID (sama seperti di index.js)
-  async function resolveGroupJidIfNeeded(groupTarget, ronzzInstance) {
+  // Silence incoming call offers
+  ronzz.ws.on('CB:call', async (json) => {
     try {
-      if (/@g\.us$/.test(groupTarget)) {
-        return groupTarget
-      }
-      // Extract invite code from link
-      const match = String(groupTarget).match(/chat\.whatsapp\.com\/(\w+)/i)
-      if (!match) return null
-      const code = match[1]
-      // Try get info first; if not in group, accept invite
-      let info
-      try {
-        info = await ronzzInstance.groupGetInviteInfo(code)
-      } catch {}
-      if (!info) {
-        try {
-          const jid = await ronzzInstance.groupAcceptInvite(code)
-          return jid || null
-        } catch {
-          return null
-        }
-      }
-      // If have info, prefer id
-      if (info && info.id) return info.id
-      return null
-    } catch {
-      return null
-    }
-  }
+      const tag = json?.content?.[0]?.tag
+      if (tag !== 'offer') return
+      // intentionally do nothing
+    } catch {}
+  })
 
   return ronzz
 }
 
-startronzz()
+startBot()

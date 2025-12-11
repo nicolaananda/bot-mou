@@ -365,7 +365,7 @@ This project is licensed under the **ISC License** - see the [LICENSE](LICENSE) 
 
 ## 📞 Support
 
-- 📧 **Email**: [Your email]
+- 📧 **Email**: gmail@Nicola.id
 - 💬 **Issues**: [Create an issue](https://github.com/nicolaananda/bot-mou/issues)
 - 📖 **Docs**: [PRD Documentation](./PRD-Bot-Admin-MoU-Validator.md)
 
