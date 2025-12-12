@@ -1,34 +1,32 @@
-# 🔍 How to Get WhatsApp Group ID
+# 🔍 How to Configure Group Whitelist
 
-## Method 1: From Console Logs (Easiest)
+## Method 1: Using Group Name (Easiest) ✨
 
 ### Steps:
 
-1. **Start the bot** (development mode for easier viewing):
+1. **Check your WhatsApp group name**
+   - Open WhatsApp
+   - Go to the group
+   - Check the group name at the top (e.g., "MoU Test", "Finance Team")
+
+2. **Add to `.env` file** using the group name:
    ```bash
-   npm start
-   # or if running with PM2:
-   npm run pm2:logs
+   GRUP_ALLOW=MoU Test
    ```
 
-2. **Send any message** in the WhatsApp group where bot is added
-   - Can be simple text like "test"
-   - Bot doesn't need to respond
-
-3. **Check the console logs**, you'll see something like:
-   ```
-   [GROUP CHECK] Bot ignored message from non-whitelisted group: 120363420561752464@g.us
-   ```
-
-4. **Copy the Group ID**: 
-   ```
-   120363420561752464@g.us
-   ```
-
-5. **Add to `.env` file**:
+3. **For multiple groups** (comma-separated):
    ```bash
-   GRUP_ALLOW=120363420561752464@g.us
+   GRUP_ALLOW=MoU Test,Finance Team,Legal Department
    ```
+
+4. **Restart bot**:
+   ```bash
+   npm run pm2:restart
+   ```
+
+**Note**: Group name matching is **case-insensitive** and uses **partial match**:
+- `GRUP_ALLOW=MoU` will match "MoU Test", "MoU Production", "Team MoU", etc.
+- `GRUP_ALLOW=test` will match "MoU Test", "Test Group", "Testing", etc.
 
 ---
 
@@ -92,17 +90,25 @@
 
 ### Single Group:
 ```bash
-GRUP_ALLOW=120363420561752464@g.us
+GRUP_ALLOW=MoU Test
 ```
 
 ### Multiple Groups (Comma Separated):
 ```bash
-GRUP_ALLOW=120363420561752464@g.us,120363281630609187@g.us,120363999888777666@g.us
+GRUP_ALLOW=MoU Test,Finance Team,Legal Department
 ```
 
 ### With Spaces (Will be auto-trimmed):
 ```bash
-GRUP_ALLOW=120363420561752464@g.us, 120363281630609187@g.us, 120363999888777666@g.us
+GRUP_ALLOW=MoU Test, Finance Team, Legal Department
+```
+
+### Partial Match (Flexible):
+```bash
+# This will match any group containing "MoU"
+GRUP_ALLOW=MoU
+
+# Matches: "MoU Test", "MoU Production", "Team MoU Finance", etc.
 ```
 
 ---

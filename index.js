@@ -190,7 +190,7 @@ function buildReportSuccess(fnMeta, llmData) {
   const amount = llmData?.amount_rupiah || fnMeta.amountRupiah || '-'
   const amountFormatted = amount !== '-' ? `Rp${Number(amount).toLocaleString('id-ID')}` : '-'
   
-  return `✅ Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
+  return `👌🏻 Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
 
 📅 Tanggal Awal: ${startDate}
 📅 Tanggal Akhir: ${endDate}
@@ -254,7 +254,7 @@ async function handleServerCommand(ronzz, m) {
     // PM2 status (if available)
     let pm2Status = 'Not running with PM2'
     if (process.env.pm_id !== undefined) {
-      pm2Status = `✅ Running (ID: ${process.env.pm_id}, Instance: ${process.env.NODE_APP_INSTANCE || 0})`
+      pm2Status = `👌🏻 Running (ID: ${process.env.pm_id}, Instance: ${process.env.NODE_APP_INSTANCE || 0})`
     }
     
     // Check disk space (Linux/Mac only)
@@ -281,13 +281,23 @@ async function handleServerCommand(ronzz, m) {
     const responseTime = endTime - startTime
     
     // Check group whitelist status
-    const allowedGroups = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim()).filter(Boolean)
-    const groupWhitelistStatus = allowedGroups.length > 0 
-      ? `✅ Enabled (${allowedGroups.length} group${allowedGroups.length > 1 ? 's' : ''})`
+    const allowedGroupNames = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim()).filter(Boolean)
+    const groupWhitelistStatus = allowedGroupNames.length > 0 
+      ? `👌🏻 Enabled (${allowedGroupNames.length} group${allowedGroupNames.length > 1 ? 's' : ''})`
       : '⚠️ Disabled (All groups allowed)'
-    const currentGroupStatus = allowedGroups.length === 0 || allowedGroups.includes(m.chat)
-      ? '✅ Whitelisted'
-      : '❌ Not whitelisted'
+    
+    // Get current group name
+    let currentGroupStatus = '👌🏻 Whitelisted'
+    if (allowedGroupNames.length > 0) {
+      try {
+        const groupMetadata = await ronzz.groupMetadata(m.chat)
+        const groupName = (groupMetadata?.subject || '').toLowerCase()
+        const isWhitelisted = allowedGroupNames.some(allowed => groupName.toLowerCase().includes(allowed.toLowerCase()))
+        currentGroupStatus = isWhitelisted ? '👌🏻 Whitelisted' : '❌ Not whitelisted'
+      } catch (e) {
+        currentGroupStatus = '⚠️ Unable to check'
+      }
+    }
     
     const report = `🖥️ *SERVER & BOT STATUS REPORT*
 
@@ -344,7 +354,7 @@ async function handleServerCommand(ronzz, m) {
 
 _Monitoring by ${global.ownerName || 'Admin'}_`
 
-    await ronzz.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+    await ronzz.sendMessage(m.chat, { react: { text: '👌🏻', key: m.key } })
     await ronzz.sendMessage(m.chat, { text: report }, { quoted: m })
   } catch (err) {
     console.error('Server command error:', err)
@@ -358,12 +368,27 @@ module.exports = async (ronzz, m, mek) => {
     const isGroup = m.isGroup
     if (!isGroup) return
 
-    // Check if group is allowed
-    const allowedGroups = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim()).filter(Boolean)
+    // Check if group is allowed (by group name)
+    const allowedGroupNames = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim().toLowerCase()).filter(Boolean)
     
-    if (allowedGroups.length > 0 && !allowedGroups.includes(m.chat)) {
-      console.log(`[GROUP CHECK] Bot ignored message from non-whitelisted group: ${m.chat}`)
-      return
+    if (allowedGroupNames.length > 0) {
+      // Get group metadata to check name
+      let groupMetadata
+      try {
+        groupMetadata = await ronzz.groupMetadata(m.chat)
+      } catch (e) {
+        console.log(`[GROUP CHECK] Failed to get group metadata: ${e.message}`)
+        return
+      }
+      
+      const groupName = (groupMetadata?.subject || '').toLowerCase()
+      
+      if (!allowedGroupNames.some(allowed => groupName.includes(allowed))) {
+        console.log(`[GROUP CHECK] Bot ignored message from non-whitelisted group: "${groupMetadata?.subject}" (${m.chat})`)
+        return
+      }
+      
+      console.log(`[GROUP CHECK] Message from whitelisted group: "${groupMetadata?.subject}"`)
     }
 
     // Handle text commands
@@ -470,7 +495,7 @@ module.exports = async (ronzz, m, mek) => {
       try { await ronzz.sendMessage(m.chat, { react: { text: '❌', key: m.key } }) } catch {}
       await ronzz.sendMessage(m.chat, { text: buildReportFailure(fileName, issues) }, { quoted: m })
     } else {
-      try { await ronzz.sendMessage(m.chat, { react: { text: '✅', key: m.key } }) } catch {}
+      try { await ronzz.sendMessage(m.chat, { react: { text: '👌🏻', key: m.key } }) } catch {}
       await ronzz.sendMessage(m.chat, { text: buildReportSuccess(fileMeta, llmData) }, { quoted: m })
     }
   } catch (err) {
