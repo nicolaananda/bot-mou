@@ -210,6 +210,7 @@ Mohon perbaiki file atau nama file sebelum diunggah kembali.`
 // Server monitoring function
 async function handleServerCommand(ronzz, m) {
   try {
+    const startTime = Date.now()
     await ronzz.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
     
     // System info
@@ -275,6 +276,10 @@ async function handleServerCommand(ronzz, m) {
       return `${gb} GB`
     }
     
+    // Calculate response time
+    const endTime = Date.now()
+    const responseTime = endTime - startTime
+    
     const report = `🖥️ *SERVER & BOT STATUS REPORT*
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -316,6 +321,12 @@ async function handleServerCommand(ronzz, m) {
 ━━━━━━━━━━━━━━━━━━━━━━
 🔹 RSS: ${processMemMB} MB
 🔹 Heap Used: ${heapUsedMB} MB / ${heapTotalMB} MB
+
+━━━━━━━━━━━━━━━━━━━━━━
+📶 *BOT PERFORMANCE*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Response Time: ${responseTime}ms
+🔹 Status: ${responseTime < 1000 ? '🟢 Excellent' : responseTime < 3000 ? '🟡 Good' : '🔴 Slow'}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ⏰ *Timestamp: ${moment().format('DD MMM YYYY HH:mm:ss')}*

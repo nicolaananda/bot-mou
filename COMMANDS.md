@@ -39,6 +39,10 @@
   - RSS (Resident Set Size)
   - Heap usage
 
+- 📶 **Bot Performance**
+  - Response time in milliseconds
+  - Status indicator (🟢 Excellent / 🟡 Good / 🔴 Slow)
+
 **Example:**
 
 ```
@@ -90,6 +94,12 @@ Bot: [Displays detailed server report]
 ━━━━━━━━━━━━━━━━━━━━━━
 🔹 RSS: 245.32 MB
 🔹 Heap Used: 128.45 MB / 180.00 MB
+
+━━━━━━━━━━━━━━━━━━━━━━
+📶 BOT PERFORMANCE
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Response Time: 324ms
+🔹 Status: 🟢 Excellent
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ⏰ Timestamp: 12 Dec 2025 21:30:45
@@ -197,9 +207,13 @@ if (text === 'mycommand' || text === '.mycommand') {
 ## 💡 Tips
 
 1. **Server Monitoring**: Use `server` command regularly to check bot health
-2. **MoU Validation**: Ensure filename follows the correct format
-3. **Response Time**: 
-   - Server command: ~2-3 seconds
+2. **Response Time Indicators**:
+   - 🟢 Excellent: < 1000ms (bot very responsive)
+   - 🟡 Good: 1000-3000ms (normal performance)
+   - 🔴 Slow: > 3000ms (check server load/network)
+3. **MoU Validation**: Ensure filename follows the correct format
+4. **Response Time**: 
+   - Server command: ~300-800ms (measured in output)
    - MoU validation: ~15-40 seconds (OpenAI processing)
 
 ---
