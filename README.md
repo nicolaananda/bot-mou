@@ -91,15 +91,30 @@ Type `server` in WhatsApp to get real-time server status: CPU, RAM, disk usage, 
    ↓
 4️⃣ Bot validates against filename
    ↓
-5️⃣ Bot reacts with ✅ or ❌
+5️⃣ Bot reacts with 👌🏻 (success) or ❌ (failure)
    ↓
-6️⃣ Detailed report sent to group
+6️⃣ Detailed report sent to bot's number (private, for records)
 ```
 
-### Success Example
+### In Group (Reaction Only)
 
 ```
-✅ Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
+User: [Uploads MoU PDF]
+Bot: ⏳ → 👌🏻 (success) or ❌ (failure)
+```
+
+### In Bot's Private Chat (Detailed Report)
+
+**Success Example:**
+```
+📋 VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━
+📁 File: MoU Hasan - Umi 100 jt...pdf
+👥 Group: 120363420561752464@g.us
+⏰ Time: 12 Dec 2025 22:15:30
+━━━━━━━━━━━━━━━━━━━━━━
+
+👌🏻 Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
 
 📅 Tanggal Awal: 7 Desember 2025
 📅 Tanggal Akhir: 7 Juni 2026
@@ -109,9 +124,15 @@ Type `server` in WhatsApp to get real-time server status: CPU, RAM, disk usage, 
 Mohon CEO tinjau dan approve.
 ```
 
-### Failure Example
-
+**Failure Example:**
 ```
+📋 VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━
+📁 File: MoU Hasan - Umi 50 jt...pdf
+👥 Group: 120363420561752464@g.us
+⏰ Time: 12 Dec 2025 22:16:45
+━━━━━━━━━━━━━━━━━━━━━━
+
 ❌ Validasi MoU GAGAL. Admin 1/2, mohon cek kembali file PDF *MoU [...].pdf*. Rincian:
 - Tanggal awal di PDF tidak sama dengan tanggal di nama file
 - Nominal di PDF (Rp50.000.000) tidak cocok dengan nama file (Rp100.000.000)

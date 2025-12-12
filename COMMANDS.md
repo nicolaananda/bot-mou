@@ -122,8 +122,10 @@ Monitoring by Nicola Ananda
    - React with ⏳ (processing)
    - Extract data using OpenAI
    - Validate dates, duration, and amount
-   - React with ✅ (success) or ❌ (failure)
-   - Send detailed validation report
+   - React with 👌🏻 (success) or ❌ (failure)
+   - Send detailed validation report to bot's own number (for records)
+
+**Note**: Group members only see the reaction emoji. Full validation report is sent to the bot's number privately for record-keeping.
 
 **Filename Format:**
 ```
@@ -142,9 +144,22 @@ MoU Hasan - Umi 100 jt, 6 Bulan (7 Desember 2025 - 7 Juni 2026) I-Adie.pdf
 - ✅ Amount (capital/investment)
 - ✅ Signature date
 
-**Success Response:**
+**Group Response (Reaction Only):**
+- Success: 👌🏻
+- Failure: ❌
+
+**Bot's Private Chat (Full Report):**
+
+Success:
 ```
-✅ Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
+📋 VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━
+📁 File: MoU Hasan - Umi 100 jt...pdf
+👥 Group: 120363420561752464@g.us
+⏰ Time: 12 Dec 2025 22:15:30
+━━━━━━━━━━━━━━━━━━━━━━
+
+👌🏻 Validasi MoU LENGKAP: Detail file telah diverifikasi dan sesuai dengan isi dokumen.
 
 📅 Tanggal Awal: 7 Desember 2025
 📅 Tanggal Akhir: 7 Juni 2026
@@ -154,9 +169,16 @@ MoU Hasan - Umi 100 jt, 6 Bulan (7 Desember 2025 - 7 Juni 2026) I-Adie.pdf
 Mohon CEO tinjau dan approve.
 ```
 
-**Failure Response:**
+Failure:
 ```
-❌ Validasi MoU GAGAL. Admin 1/2, mohon cek kembali file PDF MoU [...].pdf. Rincian:
+📋 VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━
+📁 File: MoU Hasan - Umi 50 jt...pdf
+👥 Group: 120363420561752464@g.us
+⏰ Time: 12 Dec 2025 22:16:45
+━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Validasi MoU GAGAL. Admin 1/2, mohon cek kembali file PDF *MoU [...].pdf*. Rincian:
 - Tanggal awal di PDF tidak sama dengan tanggal di nama file
 - Nominal di PDF (Rp50.000.000) tidak cocok dengan nama file (Rp100.000.000)
 

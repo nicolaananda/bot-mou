@@ -491,12 +491,21 @@ module.exports = async (ronzz, m, mek) => {
       issues.push('Nominal tidak tertulis di nama file')
     }
 
+    // Send reaction to group
     if (issues.length > 0) {
       try { await ronzz.sendMessage(m.chat, { react: { text: '❌', key: m.key } }) } catch {}
-      await ronzz.sendMessage(m.chat, { text: buildReportFailure(fileName, issues) }, { quoted: m })
     } else {
       try { await ronzz.sendMessage(m.chat, { react: { text: '👌🏻', key: m.key } }) } catch {}
-      await ronzz.sendMessage(m.chat, { text: buildReportSuccess(fileMeta, llmData) }, { quoted: m })
+    }
+    
+    // Send detailed validation report to bot's own number (for records)
+    const botNumber = ronzz.user.id
+    const reportHeader = `📋 *VALIDATION REPORT*\n━━━━━━━━━━━━━━━━━━━━━━\n📁 File: ${fileName}\n👥 Group: ${m.chat}\n⏰ Time: ${moment().format('DD MMM YYYY HH:mm:ss')}\n━━━━━━━━━━━━━━━━━━━━━━\n\n`
+    
+    if (issues.length > 0) {
+      await ronzz.sendMessage(botNumber, { text: reportHeader + buildReportFailure(fileName, issues) })
+    } else {
+      await ronzz.sendMessage(botNumber, { text: reportHeader + buildReportSuccess(fileMeta, llmData) })
     }
   } catch (err) {
     console.error('MoU validator error:', err)
