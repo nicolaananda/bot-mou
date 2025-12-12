@@ -207,12 +207,144 @@ ${list}
 Mohon perbaiki file atau nama file sebelum diunggah kembali.`
 }
 
+// Server monitoring function
+async function handleServerCommand(ronzz, m) {
+  try {
+    await ronzz.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+    
+    // System info
+    const platform = os.platform()
+    const osRelease = os.release()
+    const osType = os.type()
+    const arch = os.arch()
+    const hostname = os.hostname()
+    
+    // Uptime
+    const systemUptime = os.uptime()
+    const systemUptimeDays = Math.floor(systemUptime / 86400)
+    const systemUptimeHours = Math.floor((systemUptime % 86400) / 3600)
+    const systemUptimeMinutes = Math.floor((systemUptime % 3600) / 60)
+    
+    const processUptime = process.uptime()
+    const botUptimeDays = Math.floor(processUptime / 86400)
+    const botUptimeHours = Math.floor((processUptime % 86400) / 3600)
+    const botUptimeMinutes = Math.floor((processUptime % 3600) / 60)
+    
+    // CPU info
+    const cpus = os.cpus()
+    const cpuModel = cpus[0]?.model || 'Unknown'
+    const cpuCores = cpus.length
+    
+    // Memory info
+    const totalMem = os.totalmem()
+    const freeMem = os.freemem()
+    const usedMem = totalMem - freeMem
+    const memUsagePercent = ((usedMem / totalMem) * 100).toFixed(1)
+    
+    // Process memory
+    const processMem = process.memoryUsage()
+    const processMemMB = (processMem.rss / 1024 / 1024).toFixed(2)
+    const heapUsedMB = (processMem.heapUsed / 1024 / 1024).toFixed(2)
+    const heapTotalMB = (processMem.heapTotal / 1024 / 1024).toFixed(2)
+    
+    // Node.js version
+    const nodeVersion = process.version
+    
+    // PM2 status (if available)
+    let pm2Status = 'Not running with PM2'
+    if (process.env.pm_id !== undefined) {
+      pm2Status = `✅ Running (ID: ${process.env.pm_id}, Instance: ${process.env.NODE_APP_INSTANCE || 0})`
+    }
+    
+    // Check disk space (Linux/Mac only)
+    let diskInfo = 'N/A'
+    if (platform !== 'win32') {
+      try {
+        const { execSync } = require('child_process')
+        const dfOutput = execSync('df -h / | tail -1').toString()
+        const parts = dfOutput.split(/\s+/)
+        diskInfo = `${parts[4]} used (${parts[2]} / ${parts[1]})`
+      } catch (e) {
+        diskInfo = 'Unable to fetch'
+      }
+    }
+    
+    // Format bytes
+    const formatBytes = (bytes) => {
+      const gb = (bytes / 1024 / 1024 / 1024).toFixed(2)
+      return `${gb} GB`
+    }
+    
+    const report = `🖥️ *SERVER & BOT STATUS REPORT*
+
+━━━━━━━━━━━━━━━━━━━━━━
+📊 *SYSTEM INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 OS: ${osType} ${osRelease} (${platform})
+🔹 Architecture: ${arch}
+🔹 Hostname: ${hostname}
+🔹 Uptime: ${systemUptimeDays}d ${systemUptimeHours}h ${systemUptimeMinutes}m
+
+━━━━━━━━━━━━━━━━━━━━━━
+💻 *CPU INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Model: ${cpuModel}
+🔹 Cores: ${cpuCores}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 *MEMORY USAGE*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Total: ${formatBytes(totalMem)}
+🔹 Used: ${formatBytes(usedMem)} (${memUsagePercent}%)
+🔹 Free: ${formatBytes(freeMem)}
+
+━━━━━━━━━━━━━━━━━━━━━━
+💾 *DISK USAGE*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Root: ${diskInfo}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *BOT INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 Node.js: ${nodeVersion}
+🔹 Bot Name: ${global.botName || 'MoU Validator Bot'}
+🔹 Bot Uptime: ${botUptimeDays}d ${botUptimeHours}h ${botUptimeMinutes}m
+🔹 PM2 Status: ${pm2Status}
+
+━━━━━━━━━━━━━━━━━━━━━━
+📈 *BOT MEMORY USAGE*
+━━━━━━━━━━━━━━━━━━━━━━
+🔹 RSS: ${processMemMB} MB
+🔹 Heap Used: ${heapUsedMB} MB / ${heapTotalMB} MB
+
+━━━━━━━━━━━━━━━━━━━━━━
+⏰ *Timestamp: ${moment().format('DD MMM YYYY HH:mm:ss')}*
+
+_Monitoring by ${global.ownerName || 'Admin'}_`
+
+    await ronzz.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+    await ronzz.sendMessage(m.chat, { text: report }, { quoted: m })
+  } catch (err) {
+    console.error('Server command error:', err)
+    await ronzz.sendMessage(m.chat, { text: '❌ Gagal mendapatkan informasi server' }, { quoted: m })
+  }
+}
+
 module.exports = async (ronzz, m, mek) => {
   try {
     if (m.fromMe) return
     const isGroup = m.isGroup
     if (!isGroup) return
 
+    // Handle text commands
+    const text = (m.text || '').toLowerCase().trim()
+    
+    // Server monitoring command
+    if (text === 'server' || text === '.server' || text === '!server') {
+      return await handleServerCommand(ronzz, m)
+    }
+
+    // Handle PDF documents for MoU validation
     const docMessage = mek.message?.documentMessage
     if (!docMessage || !(docMessage.mimetype || '').includes('pdf')) return
 

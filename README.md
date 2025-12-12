@@ -56,6 +56,14 @@ Leverages OpenAI's GPT-4o-mini with file search for accurate data extraction.
 
 </td>
 </tr>
+<tr>
+<td colspan="3">
+
+### 🖥️ Server Monitoring
+Type `server` in WhatsApp to get real-time server status: CPU, RAM, disk usage, bot uptime, and PM2 status.
+
+</td>
+</tr>
 </table>
 
 ### What Gets Validated?
@@ -168,6 +176,30 @@ pm2 startup
 
 ---
 
+## 💬 Commands
+
+### 🖥️ Server Monitoring
+
+Simply type `server` in the WhatsApp group to get detailed server status:
+
+```
+server
+```
+
+**Response includes:**
+- 📊 System info (OS, architecture, uptime)
+- 💻 CPU details (model, cores)
+- 🧠 Memory usage (total, used, free)
+- 💾 Disk usage
+- 🤖 Bot info (Node.js version, uptime, PM2 status)
+- 📈 Bot memory usage
+
+Perfect for remote monitoring without SSH! 🎯
+
+For complete command documentation, see **[COMMANDS.md](./COMMANDS.md)**
+
+---
+
 ## 📝 Filename Convention
 
 The bot requires a specific filename format for validation:
@@ -232,6 +264,8 @@ Topics covered:
 - 💰 Cost Analysis
 - ❓ FAQ & Troubleshooting
 
+**Commands:** See **[COMMANDS.md](./COMMANDS.md)** for all available bot commands
+
 ---
 
 ## 🛠️ Tech Stack
@@ -271,14 +305,21 @@ Topics covered:
 bot-mou/
 ├── 📄 nicola.js              # Entry point (npm start)
 ├── 📄 main.js                # WhatsApp bot initialization
-├── 📄 index.js               # MoU validation handler
+├── 📄 index.js               # Message handler (MoU validation + commands)
 ├── 📄 setting.js             # Bot configuration
 ├── 📦 package.json           # Dependencies & scripts
+├── 📄 ecosystem.config.js    # PM2 configuration
 ├── 📁 session/               # WhatsApp authentication data
 ├── 📁 pdf/                   # Test MoU files
 │   └── MoU Hasan - Umi...pdf
-├── 📄 PRD-Bot-Admin-MoU-Validator.md  # Complete PRD
-├── 📄 README.md              # This file
+├── 📁 logs/                  # PM2 logs directory
+├── 📄 README.md              # Main documentation
+├── 📄 COMMANDS.md            # Bot commands reference
+├── 📄 QUICK-START.md         # Quick deployment guide
+├── 📄 PM2-SETUP.md           # Complete PM2 guide
+├── 📄 README-PM2.md          # PM2 vs Systemd vs Docker
+├── 📄 SETUP.md               # Development setup guide
+├── 📄 PRD-Bot-Admin-MoU-Validator.md  # Product requirements
 └── 📄 .gitignore             # Git ignore rules
 ```
 

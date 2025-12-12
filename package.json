@@ -33,7 +33,6 @@
     "awesome-phonenumber": "^2.69.0",
     "canvas": "^3.0.0",
     "chalk": "^4.1.2",
-    "child_process": "^1.0.2",
     "clui": "^0.3.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
