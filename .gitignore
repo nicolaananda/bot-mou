@@ -6,8 +6,8 @@ node_modules/
 .env.local
 
 # WhatsApp session data (sensitive)
-session/
-session/*.json
+#session/
+#session/*.json
 
 # Package lock (optional, can be included if needed)
 # package-lock.json
