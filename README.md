@@ -264,7 +264,8 @@ Topics covered:
 - 💰 Cost Analysis
 - ❓ FAQ & Troubleshooting
 
-**Commands:** See **[COMMANDS.md](./COMMANDS.md)** for all available bot commands
+**Commands:** See **[COMMANDS.md](./COMMANDS.md)** for all available bot commands  
+**Cost Analysis:** See **[COST-ANALYSIS.md](./COST-ANALYSIS.md)** for detailed OpenAI cost breakdown
 
 ---
 
@@ -382,7 +383,19 @@ MoU Hasan - Umi 100 jt, 6 Bulan (7 Desember 2025 - 7 Juni 2026) I-Adie.pdf
 - **File Search Tool**: ~$0.10 per GB-day (minimal for 1 PDF)
 - **GPT-4o-mini Tokens**: ~$0.15-0.60 per 1M tokens
 
-**Estimated: $0.01 - $0.05 per validation**
+**Estimated: $0.001 - $0.002 per validation (~Rp 15-30)**
+
+### 🎯 Budget Guide
+
+| Budget | Can Validate | Duration |
+|--------|--------------|----------|
+| **$5 USD** | **~3,300 MoUs** | 1-3 years (typical SME) |
+| **$10 USD** | **~6,600 MoUs** | 2-5 years |
+| **$20 USD** | **~13,000 MoUs** | 5+ years |
+
+💡 **Example**: 50 MoUs/month × $0.0015 = **$0.075/month** (~Rp 1,125)
+
+📊 **Full cost breakdown**: See [COST-ANALYSIS.md](./COST-ANALYSIS.md)
 
 ### Performance
 - **PDF Download**: 1-2 seconds
