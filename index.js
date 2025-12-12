@@ -280,6 +280,15 @@ async function handleServerCommand(ronzz, m) {
     const endTime = Date.now()
     const responseTime = endTime - startTime
     
+    // Check group whitelist status
+    const allowedGroups = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim()).filter(Boolean)
+    const groupWhitelistStatus = allowedGroups.length > 0 
+      ? `✅ Enabled (${allowedGroups.length} group${allowedGroups.length > 1 ? 's' : ''})`
+      : '⚠️ Disabled (All groups allowed)'
+    const currentGroupStatus = allowedGroups.length === 0 || allowedGroups.includes(m.chat)
+      ? '✅ Whitelisted'
+      : '❌ Not whitelisted'
+    
     const report = `🖥️ *SERVER & BOT STATUS REPORT*
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -315,6 +324,8 @@ async function handleServerCommand(ronzz, m) {
 🔹 Bot Name: ${global.botName || 'MoU Validator Bot'}
 🔹 Bot Uptime: ${botUptimeDays}d ${botUptimeHours}h ${botUptimeMinutes}m
 🔹 PM2 Status: ${pm2Status}
+🔹 Group Whitelist: ${groupWhitelistStatus}
+🔹 Current Group: ${currentGroupStatus}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📈 *BOT MEMORY USAGE*
@@ -346,6 +357,14 @@ module.exports = async (ronzz, m, mek) => {
     if (m.fromMe) return
     const isGroup = m.isGroup
     if (!isGroup) return
+
+    // Check if group is allowed
+    const allowedGroups = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim()).filter(Boolean)
+    
+    if (allowedGroups.length > 0 && !allowedGroups.includes(m.chat)) {
+      console.log(`[GROUP CHECK] Bot ignored message from non-whitelisted group: ${m.chat}`)
+      return
+    }
 
     // Handle text commands
     const text = (m.text || '').toLowerCase().trim()

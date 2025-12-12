@@ -26,10 +26,13 @@ Bot sekarang sudah di-update untuk load `OPENAI_KEY` dari file `.env`.
 
 ### 1. Pastikan `.env` File Ada
 
-File `.env` sudah ada dengan OPENAI_KEY yang valid:
-```
+File `.env` sudah ada dengan konfigurasi yang valid:
+```bash
 OPENAI_KEY=sk-proj-...
+GRUP_ALLOW=120363420561752464@g.us,120363281630609187@g.us
 ```
+
+**Cara dapat Group ID**: Lihat [HOW-TO-GET-GROUP-ID.md](./HOW-TO-GET-GROUP-ID.md)
 
 ### 2. Restart Bot
 

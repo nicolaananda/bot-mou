@@ -142,11 +142,17 @@ npm install --legacy-peer-deps
 
 # 3. Configure environment
 cp env.example .env
-nano .env  # Add your OPENAI_KEY
+nano .env  # Add your OPENAI_KEY and GRUP_ALLOW
+
+# Example .env:
+# OPENAI_KEY=sk-proj-your-key-here
+# GRUP_ALLOW=120363420561752464@g.us
 
 # 4. Start the bot (development)
 npm start
 ```
+
+📖 **How to get Group ID**: See [HOW-TO-GET-GROUP-ID.md](./HOW-TO-GET-GROUP-ID.md)
 
 ### Production Setup (Recommended)
 
@@ -232,9 +238,15 @@ MoU Test (no dates).pdf               # Missing date range
 Create a `.env` file in the root directory:
 
 ```bash
-# Required
+# Required - OpenAI API Key
 OPENAI_KEY=sk-proj-your-api-key-here
+
+# Required - Allowed WhatsApp Group IDs (comma-separated)
+# Bot will ONLY work in these groups
+GRUP_ALLOW=120363420561752464@g.us,120363281630609187@g.us
 ```
+
+📖 **How to get Group ID**: See [HOW-TO-GET-GROUP-ID.md](./HOW-TO-GET-GROUP-ID.md)
 
 ### Bot Settings
 
