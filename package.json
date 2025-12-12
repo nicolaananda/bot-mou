@@ -16,6 +16,12 @@
     "pg:schema": "node -e \"require('dotenv').config(); const fs=require('fs'); const sql=fs.readFileSync('./options/schema.sql','utf8'); require('./config/postgres').query(sql).then(()=>{console.log('Schema applied')}).catch(e=>{console.error(e);process.exit(1)})\"",
     "pg:migrate": "node ./options/migrate-to-postgres.js",
     "pg:dedup": "node ./options/dedup-transaksi.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop bot-mou-admin",
+    "pm2:restart": "pm2 restart bot-mou-admin",
+    "pm2:logs": "pm2 logs bot-mou-admin",
+    "pm2:monit": "pm2 monit",
+    "pm2:delete": "pm2 delete bot-mou-admin",
     "lint": "eslint index.js",
     "lint:fix": "eslint --fix index.js",
     "format": "prettier --write index.js"

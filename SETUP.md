@@ -1,5 +1,23 @@
 # 🚀 Setup Guide - Bot Admin MoU Validator
 
+## 🎯 Production Setup (Recommended)
+
+**Bot sekarang sudah configured untuk PM2!**
+
+Untuk deployment production, gunakan PM2:
+- ⚡ **Quick Start**: Lihat [QUICK-START.md](./QUICK-START.md)
+- 📖 **Full Guide**: Lihat [PM2-SETUP.md](./PM2-SETUP.md)
+
+```bash
+npm install -g pm2
+npm run pm2:start
+pm2 save && pm2 startup
+```
+
+---
+
+## 💻 Development Setup
+
 ## ✅ Fixed: OPENAI_KEY Loading Issue
 
 Bot sekarang sudah di-update untuk load `OPENAI_KEY` dari file `.env`.
@@ -98,4 +116,5 @@ pdf/MoU Hasan - Umi 100 jt, 6 Bulan (7 Desember 2025 - 7 Juni 2026) I-Adie.pdf
 
 **Bot Version:** 2.0  
 **Last Updated:** 11 Desember 2025
+
 

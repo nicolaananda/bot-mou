@@ -120,8 +120,9 @@ Mohon perbaiki file atau nama file sebelum diunggah kembali.
 - **Node.js** v16 or higher ([Download](https://nodejs.org/))
 - **OpenAI API Key** ([Get yours](https://platform.openai.com/api-keys))
 - **WhatsApp** Business or Personal account
+- **PM2** for production deployment ([Install guide](./PM2-SETUP.md))
 
-### Quick Setup
+### Development Setup
 
 ```bash
 # 1. Clone the repository
@@ -135,13 +136,33 @@ npm install --legacy-peer-deps
 cp env.example .env
 nano .env  # Add your OPENAI_KEY
 
-# 4. Start the bot
+# 4. Start the bot (development)
 npm start
 ```
+
+### Production Setup (Recommended)
+
+For production deployment, use PM2:
+
+```bash
+# 1. Install PM2 globally
+npm install -g pm2
+
+# 2. Setup and start bot
+npm run pm2:start
+
+# 3. Enable auto-start on boot
+pm2 save
+pm2 startup
+```
+
+📖 **Full production guide:** [QUICK-START.md](./QUICK-START.md) or [PM2-SETUP.md](./PM2-SETUP.md)
 
 ### First Run
 
 1. **Scan QR Code**: Open WhatsApp on your phone and scan the QR code displayed in terminal
+   - Development: Watch terminal output
+   - Production: Run `npm run pm2:logs`
 2. **Join Test Group**: Add the bot to a WhatsApp group
 3. **Test Upload**: Send a test MoU PDF to validate setup
 
