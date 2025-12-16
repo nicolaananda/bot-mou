@@ -116,17 +116,29 @@ async function extractPdfWithOpenAI(pdfBuffer) {
       },
       body: JSON.stringify({
         role: 'user',
-        content: `Ekstrak dari PDF MoU ini dalam format JSON:
+        content: `Ekstrak informasi dari PDF MoU ini dalam format JSON:
 {
-  "start_date": "tanggal pembukaan akad (format: '7 Desember 2025')",
-  "end_date": "tanggal akhir kontrak (di Pasal 3)",
-  "duration_days": angka hari (integer),
-  "duration_months": angka bulan (integer),
-  "amount_rupiah": nominal modal dalam rupiah (angka penuh, contoh: 100000000),
-  "sign_date": "tanggal tanda tangan (format: '7 Desember 2025')"
+  "start_date": "tanggal pembukaan akad",
+  "end_date": "tanggal akhir kontrak",
+  "duration_days": angka hari,
+  "duration_months": angka bulan,
+  "amount_rupiah": nominal modal dalam rupiah,
+  "sign_date": "tanggal tanda tangan"
 }
-Ekstrak dari bagian pembukaan, Pasal 3 (jangka waktu), dan bagian PIHAK KETIGA (modal).
-Isi null jika tidak ditemukan. Kembalikan JSON saja tanpa penjelasan.`
+
+INSTRUKSI SPESIFIK:
+1. "start_date": Cari di bagian MUKADIMAH, setelah kalimat "pada tgl" atau "pada tanggal". Format: "DD Bulan YYYY" (contoh: "16 Januari 2026")
+2. "end_date": Cari di Pasal 3 (JANGKA WAKTU KERJASAMA), tanggal akhir periode kontrak. Format: "DD Bulan YYYY"
+3. "duration_days": Jumlah hari dari Pasal 3, biasanya tertulis "180 hari" atau "maksimal 180 hari"
+4. "duration_months": Jumlah bulan dari Pasal 3, biasanya tertulis "6 bulan" atau "periode 6 bulan"
+5. "amount_rupiah": Nominal modal dari bagian PIHAK KETIGA (investor), dalam angka penuh tanpa titik/koma (contoh: 20000000 untuk 20 juta)
+6. "sign_date": Tanggal tanda tangan di BAGIAN PALING BAWAH dokumen, sebelum tanda tangan para pihak. Format: "DD Bulan YYYY"
+
+PENTING: 
+- Jangan gunakan tanggal dari contoh atau template
+- Pastikan start_date dan sign_date biasanya SAMA (kecuali ada perbedaan jelas di dokumen)
+- Isi null jika tidak ditemukan
+- Kembalikan HANYA JSON tanpa penjelasan atau markdown`
       })
     })
 
