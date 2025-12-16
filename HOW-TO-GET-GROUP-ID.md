@@ -247,3 +247,4 @@ GRUP_ALLOW=120363999888777666@g.us
 
 **Last Updated:** 12 Desember 2025  
 **Version:** 2.0
+
