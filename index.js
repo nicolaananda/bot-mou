@@ -380,6 +380,14 @@ module.exports = async (ronzz, m, mek) => {
     const isGroup = m.isGroup
     if (!isGroup) return
 
+    // Ignore messages from boss (only signs, doesn't need validation)
+    const bossPhonenumber = '6287700222181' // +62 877-0022-2181
+    const senderNumber = m.sender.replace('@s.whatsapp.net', '')
+    if (senderNumber === bossPhonenumber) {
+      console.log(`[SENDER CHECK] Ignored message from boss number: ${senderNumber}`)
+      return
+    }
+
     // Check if group is allowed (by group name)
     const allowedGroupNames = (process.env.GRUP_ALLOW || '').split(',').map(g => g.trim().toLowerCase()).filter(Boolean)
 
@@ -538,6 +546,59 @@ module.exports = async (ronzz, m, mek) => {
     const finalReport = issues.length > 0
       ? buildReportFailure(fileName, issues)
       : buildReportSuccess(fileMeta, llmData)
+
+    // Save log to file
+    try {
+      const logsDir = path.join(__dirname, 'logs')
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true })
+      }
+
+      // Create sanitized filename for log
+      const timestamp = moment().format('YYYYMMDD-HHmmss')
+      const sanitizedFileName = fileName
+        .replace(/\.pdf$/i, '')
+        .replace(/[^a-zA-Z0-9-_]/g, '-')
+        .substring(0, 100) // Limit length
+      const logFileName = `${sanitizedFileName}-${timestamp}.txt`
+      const logFilePath = path.join(logsDir, logFileName)
+
+      // Build detailed log content
+      const logContent = `
+═══════════════════════════════════════════════════════════════
+📋 MoU VALIDATION LOG
+═══════════════════════════════════════════════════════════════
+📁 File Name    : ${fileName}
+👥 Group        : ${m.chat}
+👤 Sender       : ${m.sender}
+⏰ Timestamp    : ${moment().format('DD MMMM YYYY HH:mm:ss')}
+═══════════════════════════════════════════════════════════════
+
+📊 EXTRACTED DATA FROM PDF:
+${JSON.stringify(llmData, null, 2)}
+
+📝 FILE METADATA (from filename):
+- Start Date    : ${fileMeta.start || '-'}
+- End Date      : ${fileMeta.end || '-'}
+- Duration      : ${fileMeta.durationLabel || '-'} bulan
+- Amount        : Rp ${fileMeta.amountRupiah ? Number(fileMeta.amountRupiah).toLocaleString('id-ID') : '-'}
+
+═══════════════════════════════════════════════════════════════
+🔍 VALIDATION RESULT: ${issues.length > 0 ? '❌ FAILED' : '✅ PASSED'}
+═══════════════════════════════════════════════════════════════
+
+${finalReport}
+
+═══════════════════════════════════════════════════════════════
+End of Log
+═══════════════════════════════════════════════════════════════
+`
+
+      fs.writeFileSync(logFilePath, logContent.trim(), 'utf8')
+      console.log(`[MoU VALIDATOR] 💾 Log disimpan ke: ${logFileName}`)
+    } catch (err) {
+      console.log(`[MoU VALIDATOR] ⚠️  Gagal menyimpan log ke file: ${err.message}`)
+    }
 
     // Send detailed validation report to bot's own number (for records)
     const botNumber = ronzz.user.id
