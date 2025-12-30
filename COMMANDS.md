@@ -258,3 +258,4 @@ if (text === 'mycommand' || text === '.mycommand') {
 **Bot Version:** 2.0
 
 
+

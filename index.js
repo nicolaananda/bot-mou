@@ -39,13 +39,18 @@ function extractFromFilename(fileName = '') {
     end = parts[1] || null
   }
   const durationMatch = clean.match(/(\d+)\s*bulan/i)
-  const amountMatch = clean.match(/(\d[\d.]*)\s*jt/i)
-  const amountMillion = amountMatch ? parseInt(amountMatch[1].replace(/[^\d]/g, ''), 10) : null
+  const amountMatch = clean.match(/(\d[\d.,]*)\s*jt/i)
+  let amountMillion = null
+  if (amountMatch) {
+    // Handle Indonesian decimal format: "47,5" or "47.5" -> 47.5
+    const amountStr = amountMatch[1].replace(/\./g, '').replace(',', '.')
+    amountMillion = parseFloat(amountStr)
+  }
   return {
     start,
     end,
     durationLabel: durationMatch ? durationMatch[1] : null,
-    amountRupiah: amountMillion ? amountMillion * 1000000 : null
+    amountRupiah: amountMillion ? Math.round(amountMillion * 1000000) : null
   }
 }
 
@@ -508,6 +513,20 @@ module.exports = async (ronzz, m, mek) => {
       }
     }
 
+    // Validasi rentang bulan: cek apakah start-end sesuai dengan durasi
+    if (startPdfMoment && endPdfMoment && fileMeta.durationLabel) {
+      const expectedMonths = parseInt(fileMeta.durationLabel, 10)
+      const actualMonthDiff = endPdfMoment.diff(startPdfMoment, 'months')
+
+      // Toleransi ±1 bulan karena perhitungan bulan bisa berbeda
+      if (Math.abs(actualMonthDiff - expectedMonths) > 1) {
+        const startMonth = startPdfMoment.format('MMMM')
+        const endMonth = endPdfMoment.format('MMMM')
+        const expectedEndMonth = startPdfMoment.clone().add(expectedMonths, 'months').format('MMMM')
+        issues.push(`⚠️ Rentang bulan tidak sesuai durasi: ${expectedMonths} bulan dari ${startMonth} seharusnya berakhir di ${expectedEndMonth}, bukan ${endMonth}`)
+      }
+    }
+
     const signMoment = parseIndoDate(signCandidate)
     if (signMoment && startPdfMoment && !signMoment.isSame(startPdfMoment, 'day')) {
       issues.push('Tanggal tanda tangan berbeda dengan tanggal awal akad')
@@ -535,14 +554,14 @@ module.exports = async (ronzz, m, mek) => {
       console.log('[MoU VALIDATOR] ✅ Validasi BERHASIL - Semua data sesuai')
     }
 
-    // Send reaction to group
+    // Send reaction to group (only emoji, no text report)
     if (issues.length > 0) {
       try { await ronzz.sendMessage(m.chat, { react: { text: '❌', key: m.key } }) } catch { }
     } else {
       try { await ronzz.sendMessage(m.chat, { react: { text: '👌🏻', key: m.key } }) } catch { }
     }
 
-    // Build final report
+    // Build final report (for bot number & log file only, NOT sent to group)
     const finalReport = issues.length > 0
       ? buildReportFailure(fileName, issues)
       : buildReportSuccess(fileMeta, llmData)

@@ -287,3 +287,4 @@ Add 20% buffer for safety
 **Last Updated:** Dec 2025  
 **Exchange Rate:** $1 = Rp 15,000
 
+
